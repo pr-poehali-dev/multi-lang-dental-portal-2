@@ -7,6 +7,8 @@ import { Textarea } from './ui/textarea';
 import { Label } from './ui/label';
 import { useToast } from '@/hooks/use-toast';
 
+const BACKEND_URL = 'https://functions.poehali.dev/ec0853b1-d396-469c-a41e-1dfd8e11636f';
+
 interface BookingModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -16,6 +18,7 @@ interface BookingModalProps {
 export default function BookingModal({ open, onOpenChange, lang }: BookingModalProps) {
   const t = getTranslation(lang);
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -23,16 +26,46 @@ export default function BookingModal({ open, onOpenChange, lang }: BookingModalP
     message: ''
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    toast({
-      title: t.booking.success,
-      description: t.booking.subtitle,
-    });
+    setIsSubmitting(true);
 
-    setFormData({ name: '', phone: '', service: '', message: '' });
-    onOpenChange(false);
+    try {
+      const response = await fetch(BACKEND_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          phone: formData.phone,
+          language: lang,
+          service: formData.service,
+          message: formData.message
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        toast({
+          title: t.booking.success,
+          description: t.booking.subtitle,
+        });
+        setFormData({ name: '', phone: '', service: '', message: '' });
+        onOpenChange(false);
+      } else {
+        throw new Error(data.error || 'Submission failed');
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to submit',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -88,8 +121,8 @@ export default function BookingModal({ open, onOpenChange, lang }: BookingModalP
             />
           </div>
 
-          <Button type="submit" className="w-full">
-            {t.booking.submit}
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? '...' : t.booking.submit}
           </Button>
         </form>
       </DialogContent>

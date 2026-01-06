@@ -1,0 +1,54 @@
+{
+  "tests": [
+    {
+      "name": "Handle OPTIONS preflight request",
+      "method": "OPTIONS",
+      "path": "/",
+      "expectedStatus": 200,
+      "expectedHeaders": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "POST, OPTIONS"
+      }
+    },
+    {
+      "name": "Reject GET requests",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 405,
+      "expectedBody": {
+        "error": "string"
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Submit valid lead",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "name": "Test Patient",
+        "phone": "+972501234567",
+        "language": "he",
+        "service": "Dental Implants",
+        "message": "I would like to schedule an appointment"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "success": true
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Reject missing required fields",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "service": "Whitening"
+      },
+      "expectedStatus": 400,
+      "expectedBody": {
+        "error": "string"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}

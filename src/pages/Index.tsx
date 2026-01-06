@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Language, getTranslation, isRTL } from '@/lib/i18n';
 import SEOHead from '@/components/SEOHead';
 import Header from '@/components/Header';
@@ -15,6 +16,7 @@ import {
 import Icon from '@/components/ui/icon';
 
 export default function Index() {
+  const navigate = useNavigate();
   const [lang, setLang] = useState<Language>('he');
   const [bookingOpen, setBookingOpen] = useState(false);
   const t = getTranslation(lang);
@@ -22,31 +24,37 @@ export default function Index() {
 
   const services = [
     {
+      slug: 'dental-implants',
       icon: 'Stethoscope',
       title: t.services.implants.title,
       description: t.services.implants.description
     },
     {
+      slug: 'teeth-whitening',
       icon: 'Sparkles',
       title: t.services.whitening.title,
       description: t.services.whitening.description
     },
     {
+      slug: 'orthodontics',
       icon: 'Smile',
       title: t.services.orthodontics.title,
       description: t.services.orthodontics.description
     },
     {
+      slug: 'cosmetic',
       icon: 'Heart',
       title: t.services.cosmetic.title,
       description: t.services.cosmetic.description
     },
     {
+      slug: 'prevention',
       icon: 'Shield',
       title: t.services.prevention.title,
       description: t.services.prevention.description
     },
     {
+      slug: 'surgery',
       icon: 'Scissors',
       title: t.services.surgery.title,
       description: t.services.surgery.description
@@ -151,17 +159,24 @@ export default function Index() {
               {services.map((service, index) => (
                 <Card
                   key={index}
-                  className="p-8 hover:shadow-xl transition-all hover:-translate-y-1 border-border/50"
+                  onClick={() => service.slug && navigate(`/services/${service.slug}`)}
+                  className="p-8 hover:shadow-xl transition-all hover:-translate-y-1 border-border/50 cursor-pointer group"
                 >
-                  <div className="w-14 h-14 rounded-full bg-accent/10 flex items-center justify-center mb-6">
+                  <div className="w-14 h-14 rounded-full bg-accent/10 flex items-center justify-center mb-6 group-hover:bg-accent/20 transition-colors">
                     <Icon name={service.icon as any} size={28} className="text-accent" />
                   </div>
-                  <h3 className="text-2xl font-semibold mb-3 text-primary">
+                  <h3 className="text-2xl font-semibold mb-3 text-primary group-hover:text-accent transition-colors">
                     {service.title}
                   </h3>
-                  <p className="text-muted-foreground leading-relaxed">
+                  <p className="text-muted-foreground leading-relaxed mb-4">
                     {service.description}
                   </p>
+                  {service.slug && (
+                    <div className="flex items-center gap-2 text-accent font-medium">
+                      <span>{lang === 'he' ? 'קרא עוד' : lang === 'ru' ? 'Подробнее' : lang === 'ar' ? 'اقرأ المزيد' : 'Learn More'}</span>
+                      <Icon name="ArrowLeft" size={16} className={rtl ? 'rotate-180' : ''} />
+                    </div>
+                  )}
                 </Card>
               ))}
             </div>
